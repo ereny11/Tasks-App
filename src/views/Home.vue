@@ -29,7 +29,14 @@
             
             </div>
             <div>
-              <p>{{ task.status }} <i class="pi pi-circle-fill" :class="task.status"></i></p>
+              <select v-model="task.status" class="form-select" v-if="statusSelected && selectedOptionID ===task.id" @blur="showStatus" :ref="`option${task.id}`">
+                <option>todo</option>
+                <option>in-progress</option>
+                <option>done</option>
+              </select>
+              <p class="selected-status" @click="showStatus(task.id)" v-else>
+                {{ task.status }} <i class="pi pi-circle-fill" :class="task.status"></i>
+              </p>
             </div>
           </div>
 
@@ -98,6 +105,9 @@ export default defineComponent( {
       showActions: true,
       editMode: false,
       draggingIndex: -1,
+      statusSelected: false,
+      selectedOptionID: null,
+      selectedOption: null
     };
   },
   computed: {
@@ -139,7 +149,7 @@ export default defineComponent( {
       this.showActions = true;
     },
     editTitle(id: any) {
-      const field2 = this.$refs["field" + id] as HTMLInputElement | any;
+      const field2 = this.$refs["title" + id] as HTMLInputElement | any;
       if (id) {
         this.editedTitleId = id;
         this.$nextTick(() => {
@@ -177,6 +187,26 @@ export default defineComponent( {
       this.taskssFromStore.splice(index, 0, draggedItem);
       this.draggingIndex = -1; // Reset dragging index
     },
+    showStatus(index: any){
+      // this.statusSelected = !this.statusSelected
+      const field3 = this.$refs["option" + index] as HTMLInputElement | any;
+      if (index) {
+        this.selectedOptionID = index;
+        this.$nextTick(() => {
+          if (this.$refs["option" + index]) {
+            field3[index].focus();
+            // this.$refs["title" + id][id].focus();
+            this.selectedOption = null;
+            this.statusSelected = false;
+          }
+        });
+      } else {
+        this.selectedOption = null;
+        this.statusSelected = true;
+      }
+      this.selectedOption = null;
+      this.statusSelected = true;
+    }
   },
 })
 </script>
@@ -200,7 +230,7 @@ ul {
   padding: 0;
 }
 ul li{
-  cursor: grab;
+ cursor: grab;
 }
 ul li:not(:last-child) {
   margin-bottom: 15px;
@@ -262,6 +292,9 @@ li i {
   background-color: #073983;
   color: #FFFFFF;
   transition: ease-in-out 0.3s;
+}
+.selected-status{
+  cursor: pointer;
 }
 .todo{
   color: red;
